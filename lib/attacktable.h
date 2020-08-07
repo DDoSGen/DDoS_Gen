@@ -18,11 +18,4 @@ std::map<int, std::string> attacktable = {  {1, "TCP_SYN_ATTACK"},
                                             {14, "R-U-D-Y_ATTACK"},
                                             {15, "BIG1_ATTACK"}                 };
 
-std::map<int, std::string>::iterator iter;
-
-void print_attacktable(){
-    printf("<<<< ATTACK TYPE NUMBER TABLE >>>>\n");
-    for(iter = attacktable.begin(); iter != attacktable.end(); iter++){
-        printf("#%2d.\t%s\n", iter->first, iter->second.c_str());
-    }
-}
+void print_attacktable();

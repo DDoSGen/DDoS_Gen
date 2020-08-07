@@ -15,6 +15,7 @@ class ATTACKMODULE{
 
         // args from main
         std::string tip;
+        char* dev;
         int type;
         int speed;
         int dur;

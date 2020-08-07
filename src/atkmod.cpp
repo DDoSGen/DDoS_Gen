@@ -1,6 +1,7 @@
 #include "../lib/atkmod.h"
 
-ATTACKMODULE::ATTACKMODULE(std::string tip, int type, int speed, int dur){
+ATTACKMODULE::ATTACKMODULE(char* dev, std::string tip, int type, int speed, int dur){
+    this->dev = dev;
     this->tip = tip;
     this->type = type;
     this->speed = speed;
