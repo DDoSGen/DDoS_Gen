@@ -14,15 +14,16 @@ class ATTACKMODULE{
         uint16_t bps;
 
         // args from main
+
+        // private functions
+
+    public:
+        ATTACKMODULE(char* dev, std::string tip, int type, int speed, int dur);
+        void attack();
+        
         std::string tip;
         char* dev;
         int type;
         int speed;
         int dur;
-
-        // private functions
-
-    public:
-        ATTACKMODULE(std::string tip, int type, int speed, int dur);
-        void attack();
 };
