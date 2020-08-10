@@ -22,8 +22,6 @@ class PKT{
         ////// for internal var //////
         PKTTYPE pkt;
 
-        ~PKT();
-
     public:
         // initialize
         PKT(char* dev);
@@ -31,4 +29,7 @@ class PKT{
         // functions for pcap_open_live, pcap_sendpacket
         void set_pcap();
         void send_packet();
+        static PKT make_packet(PKT pk);
+        ~PKT();
+
 };

@@ -9,6 +9,8 @@ typedef struct libnet_icmpv4_hdr ICMPHDR;
 typedef struct libnet_tcp_hdr TCPHDR;
 typedef struct libnet_udp_hdr UDPHDR;
 typedef uint8_t DATATYPE;
+typedef libnet_context LIBNETCTX;
+
 
 // define packet types
 #pragma pack(push, 1)
