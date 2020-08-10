@@ -20,13 +20,16 @@ class PKT{
         int pcap_res;
 
         ////// for internal var //////
-        PKTTYPE pkt;
 
-        ~PKT();
 
     public:
+        // 패킷 헤더 내용 접근을 위해 public으로 옮겼습니다.
+        PKTTYPE pkt;
+
         // initialize
         PKT(char* dev);
+
+        ~PKT();
 
         // functions for pcap_open_live, pcap_sendpacket
         void set_pcap();
