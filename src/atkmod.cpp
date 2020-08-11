@@ -20,53 +20,49 @@ void ATTACKMODULE::attack(){
     }
 }
 
-// uint16_t ipChecksum(libnet_ipv4_hdr *addr, int len)
-// {
+uint16_t ipChecksum(u_int16_t *addr, int len)
+{
 
-//     int count = len;
-//     register uint32_t sum = 0;
-//     uint16_t checkSum = 0;
+    int count = len;
+    register uint32_t sum = 0;
+    uint16_t checkSum = 0;
 
-//     while (count > 1) {
-//         sum += *(addr++);
-//         count -= 2;
-//     }
 
-//     if (count > 0) {
-//         sum += (IPv4HDR *) addr;
-//     }
+    if (count > 0) {
+        sum +=  *addr;
+    }
 
-//     while (sum >> 16) {
-//         sum = (sum & 0xffff) + (sum >> 16);
-//     }
+    while (sum >> 16) {
+        sum = (sum & 0xffff) + (sum >> 16);
+    }
 
-//     checkSum = ~sum;
+    checkSum = ~sum;
 
-//     return (checkSum);
-// }
-
-unsigned short in_checksum(unsigned short *ptr,int nbytes) {
-        register long sum;
-        unsigned short oddbyte;
-        register short answer;
- 
-        sum=0;
-        while(nbytes>1) {
-                sum+=*ptr++;
-                nbytes-=2;
-        }
-        if(nbytes==1) {
-                oddbyte=0;
-                *((u_char*)&oddbyte)=*(u_char*)ptr;
-                sum+=oddbyte;
-        }
- 
-        sum = (sum>>16)+(sum & 0xffff);
-        sum = sum + (sum>>16);
-        answer=(short)~sum;
-       
-        return(answer);
+    return htons(checkSum);
 }
+
+// unsigned short in_checksum(unsigned short *ptr,int nbytes) {
+//         register long sum;
+//         unsigned short oddbyte;
+//         register short answer;
+ 
+//         sum=0;
+//         while(nbytes>1) {
+//                 sum+=*ptr++;
+//                 nbytes-=2;
+//         }
+//         if(nbytes==1) {
+//                 oddbyte=0;
+//                 *((u_char*)&oddbyte)=*(u_char*)ptr;
+//                 sum+=oddbyte;
+//         }
+ 
+//         sum = (sum>>16)+(sum & 0xffff);
+//         sum = sum + (sum>>16);
+//         answer=(short)~sum;
+       
+//         return(answer);
+// }
 
 
 PKT<ETHIPTCP> PKT<ETHIPTCP>::make_packet(PKT<ETHIPTCP> packet){
@@ -82,10 +78,7 @@ PKT<ETHIPTCP> PKT<ETHIPTCP>::make_packet(PKT<ETHIPTCP> packet){
 
     // 이더넷 헤더
     /*
-    타겟이 내부 네트워크면
-    ARP 리퀘스트를 해서 맥을 받아와야 하고
-    타겟이 외부 네트워크면
-    그냥 게이트웨이 맥 주소
+    게이트웨이 맥 주소
     */
 
     // packet.pkt.eth_hdr.ether_dhost[i] = target mac
@@ -98,7 +91,10 @@ PKT<ETHIPTCP> PKT<ETHIPTCP>::make_packet(PKT<ETHIPTCP> packet){
     packet.pkt.ip_hdr.ip_hl = 5;                                // header length
     // packet.pkt.ip_hdr.ip_tos = IPTOS_LOWDELAY;                 
     packet.pkt.ip_hdr.ip_tos = 0xe0;                            // random or fix?
+    
+    // 추후 확인
     packet.pkt.ip_hdr.ip_len = htons(20);                         // total length
+
     packet.pkt.ip_hdr.ip_id = libnet_get_prand(LIBNET_PRu16);   // random ID
     packet.pkt.ip_hdr.ip_off = IP_DF;                           // don't fragment
     packet.pkt.ip_hdr.ip_ttl = libnet_get_prand(LIBNET_PR8);    // random TTL
@@ -106,10 +102,10 @@ PKT<ETHIPTCP> PKT<ETHIPTCP>::make_packet(PKT<ETHIPTCP> packet){
     packet.pkt.ip_hdr.ip_src.s_addr = libnet_get_prand(LIBNET_PRu32);  // random source IP
     // packet.pkt.ip_hdr.ip_dst = <target_ip>;
 
-    packet.pkt.ip_hdr.ip_sum = in_checksum(packet.pkt.ip_hdr, packet.pkt.ip_hdr.ip_len);                        // 체크섬, 모르겠음
-    
-    // libnet_do_checksum(libnet_t *l, uint8_t *iphdr, int protocol, int h_len);
-    // libnet_do_checksum(packet.pkt , *(packet.pkt.ip_hdr), );
+
+    // uint16_t ipChecksum(u_int16_t *addr, int len)
+    packet.pkt.ip_hdr.ip_sum = ipChecksum((uint16_t*)(&packet.pkt.ip_hdr), packet.pkt.ip_hdr.ip_len);                        // 체크섬, 모르겠음
+
     return packet;
 }
 
@@ -157,6 +153,8 @@ void* attack_routine(void* arg){
     
     // TCP_SYN_ATTACK
     case 1:
+
+
 
         break;
     
