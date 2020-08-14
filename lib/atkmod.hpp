@@ -2,28 +2,26 @@
 #include "macros.h"
 #include "attacktable.h"
 #include "pktclass.hpp"
-#include <stdint.h>
-#include <pthread.h>
+#include <arpa/inet.h>
+#include <cstdint>
+#include <thread>
 #include <string>
-
-void* attack_routine(void* arg);
+#include <memory>
 
 // TODO: make attack module class
 class ATTACKMODULE{
     private:        
         uint16_t bps;
-
-        // args from main
-
-        // private functions
-
-    public:
-        ATTACKMODULE(char* dev, std::string tip, int type, int speed, int dur);
-        void attack();
-        
-        std::string tip;
+        uint32_t tip;
         char* dev;
         int type;
         int speed;
         int dur;
+
+        // private functions
+        void attack_routine();
+    public:
+        ATTACKMODULE(char* dev, std::string tip, int type, int speed, int dur);
+        
+        void attack();
 };

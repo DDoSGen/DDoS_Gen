@@ -1,8 +1,9 @@
 #pragma once
 #include <pcap.h>
 #include <string>
-#include <stdlib.h>
+#include <cstdlib>
 #include "pkttypes.h"
+#include "others.h"
 
 /* class for packet managing
  * 1. Choose the type of packet (in pkttypes)
@@ -25,11 +26,12 @@ class PKT{
     public:
         // initialize
         PKT(char* dev);
+        ~PKT();
+
+        friend class ATTACKMODULE;
 
         // functions for pcap_open_live, pcap_sendpacket
         void set_pcap();
+        void make_packet(uint32_t target_ip);
         void send_packet();
-        static PKT make_packet(PKT pk);
-        ~PKT();
-
 };

@@ -4,14 +4,13 @@
  */
 
 // main loop for ddos
-#pragma once
-#include "../lib/atkmod.h"
+#include "../lib/atkmod.hpp"
 #include <iostream>
 #include <stdlib.h>
 #include <string>
 using namespace std;
 
-char* dev;
+char dev[HW_DEV_NAME];
 string tip;
 int type;
 int speed;
@@ -49,6 +48,10 @@ int main(int argc, char* argv[]){
 }
 
 void get_input(){
+    cout << "Enter hardware device - ex) eth0\n";
+    cout << "device: ";
+    cin >> dev;
+    
     cout << "Enter target IP - ex) 192.168.0.1\n";
     cout << "target IP: ";
     cin >> tip;
@@ -68,8 +71,9 @@ void get_input(){
 
     cout << "\nCheck your DDoS Attack settings\n";
     
+    cout << "device: " << dev << '\n';
     cout << "target IP: " << tip << '\n';
-    cout << "attack type: " << '#' << type << '(' << attacktable[type] << ")\n";
+    cout << "attack type: " << '#' << type << '\n';
     cout << "attack speed: " << speed << " [Mbps]\n";
     cout << "attacking time: " << dur << " [sec]\n";
 

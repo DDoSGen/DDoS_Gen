@@ -1,6 +1,6 @@
 #pragma once
 #include <libnet.h>
-#include <stdint.h>
+#include <cstdint>
 
 // redefine structures in libnet.h
 typedef struct libnet_ethernet_hdr ETHHDR;
@@ -17,8 +17,6 @@ typedef libnet_context LIBNETCTX;
 struct ETHIPTCP{
     ETHHDR eth_hdr;
     IPv4HDR ip_hdr;
-    TCPHDR tcp_hdr;
-    DATATYPE* data;
 };
 #pragma pack(pop)
 
@@ -27,7 +25,6 @@ struct ETHIPUDP{
     ETHHDR eth_hdr;
     IPv4HDR ip_hdr;
     UDPHDR udp_hdr;
-    DATATYPE* data;
 };
 #pragma pack(pop)
 
@@ -36,6 +33,5 @@ struct ETHIPICMP{
     ETHHDR eth_hdr;
     IPv4HDR ip_hdr;
     ICMPHDR icmp_hdr;
-    DATATYPE* data;
 };
 #pragma pack(pop)
