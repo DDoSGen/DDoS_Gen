@@ -4,10 +4,7 @@
  */
 
 // main loop for ddos
-#include "../lib/atkmod.hpp"
-#include <iostream>
-#include <stdlib.h>
-#include <string>
+#include "../lib/atkmod.h"
 using namespace std;
 
 char dev[HW_DEV_NAME];

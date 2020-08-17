@@ -1,6 +1,7 @@
 #pragma once
 
 // define thread nums
-#define THREADS 3
+#define THREADS 5
 #define HW_DEV_NAME 10
-#define ARPTABLE_LINE_SIZE 256
+#define BROADCAST_MAC "ff:ff:ff:ff:ff:ff"
+#define DONTKNOW_MAC "00:00:00:00:00:00"

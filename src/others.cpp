@@ -1,6 +1,6 @@
 #include "../lib/others.h"
 
-uint16_t ipChecksum(uint16_t *addr, uint16_t len){
+uint16_t Checksum(uint16_t *addr, uint16_t len){
     uint32_t sum = 0;
     uint16_t odd = 0;
     uint16_t checkSum = 0;
@@ -22,6 +22,44 @@ uint16_t ipChecksum(uint16_t *addr, uint16_t len){
     checkSum = (uint16_t)~sum;
 
     return htons(checkSum);
+}
+
+void fill_rand(uint8_t* storage, int byte_size){
+    for(int i = 0; i < byte_size; i++){
+        *storage = make_byte_rand(rand());
+        storage++;
+    }
+}
+
+uint8_t make_byte_rand(int seed){
+    srand(seed);
+    return (uint8_t)(rand() & 0x000000FF);
+}
+
+void get_my_mac(char* dev, mac_t* mac){
+	int sockfd;
+    struct ifreq ifr;
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+	ifr.ifr_addr.sa_family = AF_INET;
+    strncpy((char *)ifr.ifr_name , (const char *)dev, IFNAMSIZ-1);
+	ioctl(sockfd, SIOCGIFHWADDR, &ifr);
+	
+	memcpy(mac, ifr.ifr_hwaddr.sa_data, ETHER_ADDR_LEN);
+    close(sockfd);
+}
+
+uint32_t get_my_ip(char* dev){
+	int sockfd;
+    struct ifreq ifr;
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+	ifr.ifr_addr.sa_family = AF_INET;
+    strncpy((char *)ifr.ifr_name , (const char *)dev, IFNAMSIZ-1);
+	ioctl(sockfd, SIOCGIFADDR, &ifr);
+	close(sockfd);
+	
+	return ((struct sockaddr_in*)&ifr.ifr_addr)->sin_addr.s_addr;
 }
 
 /* get gate MAC by opening /proc/net/arp */
