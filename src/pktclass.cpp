@@ -141,7 +141,7 @@ void PKT::make_tcp_packet(ETHIPTCP* tcp_ptr, int flagtype, int datalen){
     tcp_ptr->ip_hdr.ip_p = IPPROTO_TCP;   
     
     /* fill tcp header */
-    tcp_ptr->tcp_hdr.th_sport = htons(80);
+    fill_rand((uint8_t*)&tcp_ptr->tcp_hdr.th_sport, sizeof(uint16_t));
     tcp_ptr->tcp_hdr.th_dport = htons(80);
     fill_rand((uint8_t*)&tcp_ptr->tcp_hdr.th_seq, sizeof(uint32_t));
     fill_rand((uint8_t*)&tcp_ptr->tcp_hdr.th_ack, sizeof(uint32_t));
