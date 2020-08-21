@@ -40,4 +40,20 @@ class PKT{
         // 패킷 만드는 함수
         void make_packet(mac_t* target_mac, uint32_t target_ip, int pkttype, int flagtype, int datalen);
         void send_packet();
+
+        // TCP connection 용 패킷 만드는 함수
+        void PKT::make_specific_packet(
+            mac_t* target_mac,
+            uint16_t id,
+            uint32_t sender_ip, 
+            uint32_t target_ip, 
+            uint16_t src_port, 
+            uint16_t dst_port,
+            uint32_t seq,
+            uint32_t ack,
+            uint16_t window,
+            int pkttype, 
+            int flagtype, 
+            int datalen
+        );
 };
