@@ -42,7 +42,7 @@ class PKT{
         void send_packet();
 
         // TCP connection 용 패킷 만드는 함수
-        void PKT::make_specific_packet(
+        void make_specific_packet(
             mac_t* target_mac,
             uint16_t id,
             uint32_t sender_ip, 
