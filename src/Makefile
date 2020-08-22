@@ -7,8 +7,8 @@ LIBS = -lpthread -lnet -lpcap
 
 CXXFLAGS = -g $(INC)
 
-OBJS = others.o attacktable.o pktclass.o atkmod.o main.o
-SRCS = others.cpp attacktable.cpp pktclass.cpp atkmod.cpp main.cpp
+OBJS = others.o attacktable.o pktclass.o atkmod.o make_specific_packet.o tcp_connection_attack.o main.o
+SRCS = others.cpp attacktable.cpp pktclass.cpp atkmod.cpp make_specific_packet.o tcp_connection_attack.o main.cpp
 
 TARGET = ddos
 

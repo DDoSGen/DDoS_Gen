@@ -64,17 +64,16 @@ void ATTACKMODULE::attack_routine(){
             case 3:
                 packet.make_packet(target_mac, target_ip, TCP, SYN_ACK, 0);
                 break;
-            /*
+            
             // TCP_CONNECTION_ATTACK
             case 4:
-
+                tcp_connection_attack(&packet, 0);
                 break;
 
             // TCP_CONGESTION_CONTROL_ATTACK
             case 5:
-
+                tcp_connection_attack(&packet, 1);
                 break;
-            */
 
             // TCP_TSNAMI_ATTACK
             case 6:
