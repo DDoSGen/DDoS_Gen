@@ -97,23 +97,21 @@ void PKT::make_packet(mac_t* target_mac, ip_t target_ip, int pkttype, int flagty
             make_tcp_packet(tcp, flagtype, datalen);
             break;
 
-        /*
+        
         case UDP:
             udp = new(ETHIPUDP);
             memset(udp, 0, sizeof(ETHIPUDP));
-            make_common_part(target_ip, (ETHIPHDR*)udp);
-            make_udp_packet();
-            pkt_ptr = (const uint8_t*)udp;
+            make_common_part(target_mac, target_ip, (ETHIPHDR*)udp);
+            make_udp_packet(udp, datalen);
             break;
 
         case ICMP:
             icmp = new(ETHIPICMP);
-            memset(udp, 0, sizeof(ETHIPICMP));
-            make_common_part(target_ip, (ETHIPHDR*)icmp);
-            make_icmp_packet();
-            pkt_ptr = (const uint8_t*)icmp;
+            memset(icmp, 0, sizeof(ETHIPICMP));
+            make_common_part(target_mac, target_ip, (ETHIPHDR*)icmp);
+            make_icmp_packet(icmp, flagtype, datalen);
             break;
-        */
+        
 
         case HTTP:
             http = new(HTTPPKT);
@@ -229,10 +227,33 @@ void PKT::make_http_packet(HTTPPKT* tcp_ptr, int flagtype, int datalen, ip_t tar
     memcpy(tcp_ptr->data, reinterpret_cast<const uint8_t*>(tmpStr.c_str()), tmpStr.length());
 }
 
-void PKT::make_udp_packet(){
+void PKT::make_udp_packet(ETHIPUDP* udp_ptr, int datalen){
+    udp_ptr->ip_hdr.ip_p = IPPROTO_UDP;   
 
+    fill_rand((uint8_t*)&udp_ptr->udp_hdr.uh_sport, sizeof(uint16_t));
+    fill_rand((uint8_t*)&udp_ptr->udp_hdr.uh_dport, sizeof(uint16_t));
+    udp_ptr->udp_hdr.uh_ulen = htons(datalen);
+    udp_ptr->udp_hdr.uh_sum = 0;
+
+    udp_ptr->ip_hdr.ip_len = htons(LIBNET_IPV4_H + LIBNET_UDP_H + datalen);
+    udp_ptr->ip_hdr.ip_sum = Checksum((uint16_t*)(&udp_ptr->ip_hdr), udp_ptr->ip_hdr.ip_len);
+
+    pktsize = sizeof(ETHIPUDP) + datalen;
+    pkt_ptr = (const uint8_t*)udp_ptr;
 }
 
-void PKT::make_icmp_packet(){
+void PKT::make_icmp_packet(ETHIPICMP* icmp_ptr, int flagtype, int datalen){
+    icmp_ptr->ip_hdr.ip_p = IPPROTO_ICMP;
 
+    icmp_ptr->icmp_hdr.icmp_type = flagtype;
+    icmp_ptr->icmp_hdr.icmp_code = 0;
+    fill_rand((uint8_t*)&icmp_ptr->icmp_hdr.hun.echo.id, sizeof(uint16_t));
+    fill_rand((uint8_t*)&icmp_ptr->icmp_hdr.hun.echo.seq, sizeof(uint16_t));
+    icmp_ptr->icmp_hdr.icmp_sum = htons(Checksum((uint16_t*)(&icmp_ptr->icmp_hdr), LIBNET_ICMPV4_ECHO_H + datalen));
+
+    icmp_ptr->ip_hdr.ip_len = htons(LIBNET_IPV4_H + LIBNET_ICMPV4_ECHO_H + datalen);
+    icmp_ptr->ip_hdr.ip_sum = Checksum((uint16_t*)(&icmp_ptr->ip_hdr), icmp_ptr->ip_hdr.ip_len);
+
+    pktsize = sizeof(ETHIPICMP) + datalen;
+    pkt_ptr = (const uint8_t*)icmp_ptr;
 }

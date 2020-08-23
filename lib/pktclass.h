@@ -25,9 +25,10 @@ class PKT{
         // 패킷 만들기 내부 함수 //
         void make_common_part(mac_t* target_mac, ip_t target_ip, ETHIPHDR* common);
         void make_tcp_packet(ETHIPTCP* tcp_ptr, int flagtype, int datalen);
-        void make_udp_packet();
-        void make_icmp_packet();
+        void make_udp_packet(ETHIPUDP* udp_ptr, int datalen);
+        void make_icmp_packet(ETHIPICMP* icmp_ptr, int flagtype, int datalen);
         void make_http_packet(HTTPPKT* tcp_ptr, int flagtype, int datalen, ip_t target_ip);
+
     public:
         // initialize
         PKT(char* dev);
