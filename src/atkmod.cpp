@@ -83,12 +83,12 @@ void ATTACKMODULE::attack_routine(){
 
             // UDP_ATTACK
             case 7:
-                //packet.make_packet(tip, UDP, ?);
+                packet.make_packet(target_mac, target_ip, UDP, 0, 1000);
                 break;
 
             // ICMP_ATTACK
             case 8:
-                //packet.make_packet(tip, ICMP, ?);
+                packet.make_packet(target_mac, target_ip, ICMP, ICMP_ECHO, 0);
                 break;
 
             /*
