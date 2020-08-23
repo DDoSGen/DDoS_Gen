@@ -16,7 +16,8 @@ class PKT{
         ETHIPTCP* tcp;
         ETHIPUDP* udp;
         ETHIPICMP* icmp;
-        
+        HTTPPKT* http;
+
         ////// 패킷 속성 //////
         int pkttype;
         int pktsize;
@@ -26,6 +27,7 @@ class PKT{
         void make_tcp_packet(ETHIPTCP* tcp_ptr, int flagtype, int datalen);
         void make_udp_packet();
         void make_icmp_packet();
+        void make_http_packet(HTTPPKT* tcp_ptr, int flagtype, int datalen, ip_t target_ip);
     public:
         // initialize
         PKT(char* dev);
@@ -40,4 +42,5 @@ class PKT{
         // 패킷 만드는 함수
         void make_packet(mac_t* target_mac, uint32_t target_ip, int pkttype, int flagtype, int datalen);
         void send_packet();
+        void handshake(mac_t* target_mac, ip_t target_ip);
 };

@@ -90,10 +90,14 @@ void ATTACKMODULE::attack_routine(){
                 //packet.make_packet(tip, ICMP, ?);
                 break;
 
-            /*
+            
             // GET_FLOODING_ATTACK
             case 9:
 
+                // send ACK packet
+                packet.handshake(target_mac, target_ip);
+
+                packet.make_packet(target_mac, target_ip, TCP, SYN_ACK, 0);
                 break;
 
             // POST_FLOODING_ATTACK
@@ -125,7 +129,7 @@ void ATTACKMODULE::attack_routine(){
             case 15:
 
             break;
-            */
+            
             default:
                 printf("type error");
                 break;
