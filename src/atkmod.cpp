@@ -95,15 +95,16 @@ void ATTACKMODULE::attack_routine(){
             // GET_FLOODING_ATTACK
             case 9:
 
-                // send ACK packet
-                packet.handshake(target_mac, target_ip);
+                // Handshake
+                // packet.handshake(target_mac, target_ip);
 
-                packet.make_packet(target_mac, target_ip, TCP, SYN_ACK, 0);
+                packet.make_packet(target_mac, target_ip, HTTP, GET, 0);
                 break;
 
             // POST_FLOODING_ATTACK
             case 10:
 
+                packet.make_packet(target_mac, target_ip, HTTP, POST, 0);
                 break;
 
             // DYNAMIC_HTTP_REQ_FLOODING
