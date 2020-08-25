@@ -212,7 +212,7 @@ void PKT::make_http_packet(HTTPPKT* tcp_ptr, int flagtype, int datalen, ip_t tar
     DATATYPE tmpData[100];
 
     this->make_tcp_packet((ETHIPTCP*)tcp_ptr, flagtype, datalen);
-    char* agent = getRandUserAgent();
+    std::string agent = getRandUserAgent();
 
     // struct in_addr{
     //     in_addr_t target_ip;
