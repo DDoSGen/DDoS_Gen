@@ -32,7 +32,7 @@ struct Param {
 } param;
 
 void recvThread(int sd) {
-	cout << "BOB9 DDoS Target Server connected\n";
+	cout << "BOB9 DDoS gen connected\n";
 
 	
 	static const int BUFSIZE = 65536;
@@ -55,7 +55,7 @@ void recvThread(int sd) {
 			}
 		}
 	}
-	cout << "disconnected\n";
+	cout << "BOB9 DDoS gen disconnected\n";
     close(sd);
 }
 

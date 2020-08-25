@@ -154,11 +154,9 @@ void ATTACKMODULE::attack_routine(){
                 printf("type error");
                 break;
         }
-        
-        if(atktype >8)
-            return;
+        int size = 0;
 
-        int size = packet.send_packet();
+        if(atktype <=8) size = packet.send_packet();
         count++;
         
         std::chrono::system_clock::time_point EndTime = std::chrono::system_clock::now();
