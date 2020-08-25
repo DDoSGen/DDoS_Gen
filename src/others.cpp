@@ -117,10 +117,10 @@ void make_MAC_byte(std::string r, uint8_t* storage){
 
 std::string getRandUserAgent(){
     // User Agent ref : https://deviceatlas.com/blog/mobile-browser-user-agent-strings
-    srand(time(NULL));
-    int ran = rand()%19;
+    srand(time(0));
+    int ran = rand()%18;
     
-    std::string userAgentList[] = {
+    std::string userAgentList[18] = {
         "Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1",
         "Mozilla/5.0 (Linux; U; Android 4.4.2; en-us; SCH-I535 Build/KOT49H) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30",
         "Mozilla/5.0 (Linux; Android 7.0; SM-A310F Build/NRD90M) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.91 Mobile Safari/537.36 OPR/42.7.2246.114996",

@@ -84,11 +84,8 @@ void PKT::send_packet(){
 }
 
 void PKT::make_packet(mac_t* target_mac, ip_t target_ip, int pkttype, int flagtype, int datalen){
-    if(pkttype == 10){
-        this->pkttype = TCP;
-    } else{
-        this->pkttype = pkttype;
-    }
+    this->pkttype = pkttype;
+
 
     switch(pkttype){
         case TCP:
@@ -221,10 +218,10 @@ void PKT::handshake(mac_t* target_mac, ip_t target_ip){
 void PKT::make_http_packet(HTTPPKT* tcp_ptr, int flagtype, int datalen, ip_t target_ip){
     using namespace std;
 
-    this->make_tcp_packet((ETHIPTCP*)tcp_ptr, ACK, datalen);
-    this->tcp->tcp_hdr.th_flags = htons(18);
+    make_tcp_packet((ETHIPTCP*)tcp_ptr, ACK, datalen);
+    
+    tcp_ptr->tcp_hdr.th_flags = htons(18);
     string agent = getRandUserAgent();
-
     // struct in_addr{
     //     in_addr_t target_ip;
     // };
@@ -233,27 +230,25 @@ void PKT::make_http_packet(HTTPPKT* tcp_ptr, int flagtype, int datalen, ip_t tar
     char* host_str = inet_ntoa(target);
     string host = string(host_str);
 
-    string atk_type;
-    if (flagtype == GET){
-        string atk_type {"GET"};
-    } else if (flagtype == POST){
-        string atk_type{"POST"};
-    };
+    // string atk_type{"GET"};
+    // if (flagtype == GET){
+    //     atk_type = "GET";
+    // } else if (flagtype == POST){
+    //     atk_type = "POST";
+    // };
 
-    string tmpStr = atk_type + " / HTTP/1.1\r\nHost: " + host +"\r\n" + "User-Agent: " + agent
+    string tmpStr = "GET / HTTP/1.1\r\nHost: " + host +"\r\n" + "User-Agent: " + agent
                                                         + "Cache-Control : no-cache\r\n";
     int httpLen = tmpStr.length();
 
-    // memset(tcp_ptr->data, 0 , tmpStr.length());
     memcpy(tcp_ptr->data, reinterpret_cast<const uint8_t*>(tmpStr.c_str()), httpLen);
     
-    tcp_ptr->ip_hdr.ip_len = htons(LIBNET_IPV4_H + tcp_ptr->tcp_hdr.th_off * 4 + datalen + httpLen);
+    // tcp_ptr->tcp_hdr.th_seq = 1;
+
     tcp_ptr->ip_hdr.ip_sum = Checksum((uint16_t*)(&tcp_ptr->ip_hdr), tcp_ptr->ip_hdr.ip_len);
     tcp_ptr->tcp_hdr.th_sum = Checksum((uint16_t*)(&tcp_ptr->tcp_hdr), tcp_ptr->tcp_hdr.th_off);
-    tcp_ptr->tcp_hdr.th_seq = 1;
 
     pktsize += tmpStr.length();
-    pkt_ptr = (const uint8_t*)tcp_ptr;
 }
 
 void PKT::make_udp_packet(ETHIPUDP* udp_ptr, int datalen){
