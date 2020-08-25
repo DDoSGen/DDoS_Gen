@@ -10,6 +10,7 @@ PKT::~PKT(){
 	pcap_close(pcap_handler);      
 }
 
+
 void PKT::set_pcap(){
 	pcap_handler = pcap_open_live(dev, BUFSIZ, 1, 1, errbuf);
 	if (pcap_handler == nullptr) {
@@ -111,9 +112,6 @@ void PKT::make_packet(mac_t* target_mac, ip_t target_ip, int pkttype, int flagty
             break;
         
         case HTTP:
-            http = new(HTTPPKT);
-            memset(http, 0, sizeof(HTTPPKT));
-            make_common_part(target_mac, target_ip, (ETHIPHDR*)http);
             make_http_packet(http, flagtype, datalen, target_ip);
             break;
         
@@ -215,41 +213,37 @@ void PKT::handshake(mac_t* target_mac, ip_t target_ip){
 */
 
 
-void PKT::make_http_packet(HTTPPKT* tcp_ptr, int flagtype, int datalen, ip_t target_ip){
+void PKT::make_http_packet(HTTPPKT* tcp_ptr, int flagtype, int sd, ip_t target_ip){
     using namespace std;
 
-    make_tcp_packet((ETHIPTCP*)tcp_ptr, ACK, datalen);
-    
-    tcp_ptr->tcp_hdr.th_flags = htons(18);
-    string agent = getRandUserAgent();
-    // struct in_addr{
-    //     in_addr_t target_ip;
-    // };
     struct in_addr target;
     target.s_addr = target_ip;
-    char* host_str = inet_ntoa(target);
-    string host = string(host_str);
+    string host {inet_ntoa(target)};
+    string data = "hello";
 
-    // string atk_type{"GET"};
     string atk_type;
-    if (flagtype == GET){
-        atk_type = string("GET");
-    } else if (flagtype == POST){
-        atk_type = string("POST");
-    };
+    if (flagtype == GET || flagtype == DYNAMIC_HTTP_REQ) atk_type = string("GET ");
+    else if (flagtype == POST) atk_type = string("POST ");
+    string dir = "/";
+    if (flagtype == DYNAMIC_HTTP_REQ){
+        dir = getRandDir();
+    }
 
-    string tmpStr = atk_type + " / HTTP/1.1\r\nHost: " + host +"\r\n" + "User-Agent: " + agent
-                                                        + "Cache-Control : no-cache\r\n";
-    int httpLen = tmpStr.length();
+    string http_temp = atk_type + dir + " HTTP/1.1\r\n";
+    string host_temp = "Host: " + host + "\r\n";
+    string user_agent_temp = "User-Agent: " + getRandUserAgent() + "\r\n";
+    string content_len_temp = "Content-length: 5\r\n";
 
-    memcpy(tcp_ptr->data, reinterpret_cast<const uint8_t*>(tmpStr.c_str()), httpLen);
+    string tmpStr = http_temp + host_temp + user_agent_temp + content_len_temp + data + "\r\n\r\n";
     
-    // tcp_ptr->tcp_hdr.th_seq = 1;
 
-    tcp_ptr->ip_hdr.ip_sum = Checksum((uint16_t*)(&tcp_ptr->ip_hdr), tcp_ptr->ip_hdr.ip_len);
-    tcp_ptr->tcp_hdr.th_sum = Checksum((uint16_t*)(&tcp_ptr->tcp_hdr), tcp_ptr->tcp_hdr.th_off);
+    ssize_t res = send(sd, tmpStr.c_str(), tmpStr.size(), 0);
+		if (res == 0 || res == -1) {
+			fprintf(stderr, "send return %ld\n", res);
+			perror("send");
+			return;
+        }
 
-    pktsize += tmpStr.length();
 }
 
 void PKT::make_udp_packet(ETHIPUDP* udp_ptr, int datalen){

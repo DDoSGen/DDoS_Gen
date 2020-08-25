@@ -28,9 +28,13 @@ enum ATK_TCP_TPYE{
     SYN_ACK = TH_SYN | TH_ACK
 };
 
-enum HTTP_TYPE{
+enum ATK_HTTP_TYPE{
     GET = 1,
-    POST = 2
+    POST = 2,
+    SLOWLORIS = 3,
+    SLOWREAD = 4,
+    DYNAMIC_HTTP_REQ = 5,
+    RUDY = 6
 };
 
 

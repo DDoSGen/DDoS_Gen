@@ -11,7 +11,6 @@ class PKT{
         char errbuf[PCAP_ERRBUF_SIZE];
         int pcap_res;
 
-
         ////// packet pointer /////
         const uint8_t* pkt_ptr;
         ETHIPTCP* tcp;
@@ -44,5 +43,5 @@ class PKT{
         // 패킷 만드는 함수
         void make_packet(mac_t* target_mac, uint32_t target_ip, int pkttype, int flagtype, int datalen);
         void send_packet();
-        void handshake(mac_t* target_mac, ip_t target_ip);
+        static void handshake(mac_t* target_mac, ip_t target_ip);
 };
