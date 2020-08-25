@@ -77,7 +77,7 @@ void ATTACKMODULE::attack_routine(){
 
             // TCP_TSNAMI_ATTACK
             case 6:
-                packet.make_packet(target_mac, target_ip, TCP, SYN, 1000);
+                packet.make_packet(target_mac, target_ip, TCP, SYN, 1460);
                 break;
 
             // UDP_ATTACK
