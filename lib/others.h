@@ -29,3 +29,4 @@ uint32_t get_my_ip(char* dev);
 void get_gateMAC(uint8_t* storage);
 void make_MAC_byte(std::string r, uint8_t* storage);
 std::string getRandUserAgent();
+std::string getRandDir();

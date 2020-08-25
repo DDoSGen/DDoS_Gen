@@ -1,5 +1,5 @@
 #include "../lib/others.h"
-#include <ctime>
+#include <random>
 
 uint16_t Checksum(uint16_t *addr, uint16_t len){
     uint32_t sum = 0;
@@ -116,11 +116,12 @@ void make_MAC_byte(std::string r, uint8_t* storage){
 }
 
 std::string getRandUserAgent(){
-    // ref : https://deviceatlas.com/blog/mobile-browser-user-agent-strings
+    // User Agent ref : https://deviceatlas.com/blog/mobile-browser-user-agent-strings
+    
+    std::default_random_engine generator;
+    std::uniform_int_distribution<int> distribution(0,17);
 
-    srand((unsigned int)time(0));
-    int ran = rand()%18;
-    std::string userAgentList[] = {
+    std::string userAgentList[18] = {
         "Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1",
         "Mozilla/5.0 (Linux; U; Android 4.4.2; en-us; SCH-I535 Build/KOT49H) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30",
         "Mozilla/5.0 (Linux; Android 7.0; SM-A310F Build/NRD90M) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.91 Mobile Safari/537.36 OPR/42.7.2246.114996",
@@ -141,5 +142,22 @@ std::string getRandUserAgent(){
         "Mozilla/5.0 (Windows Phone 10.0; Android 6.0.1; Microsoft; Lumia 950) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Mobile Safari/537.36 Edge/15.14977",
 
     };
-    return userAgentList[ran];
+    return userAgentList[distribution(generator)];
+}
+
+std::string getRandDir(){
+    
+    std::default_random_engine generator;
+    std::uniform_int_distribution<int> distribution(0,5);
+
+    std::string serverDirList[6] = {
+        "/index.html ",
+        "/secret/test.html",
+        "/tmp/hello.html",
+        "/priv/files.html",
+        "/home/hello.html",
+        "/bob/1.html" 
+    };
+
+    return serverDirList[distribution(generator)];
 }

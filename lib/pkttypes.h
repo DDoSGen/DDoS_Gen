@@ -28,6 +28,16 @@ enum ATK_TCP_TPYE{
     SYN_ACK = TH_SYN | TH_ACK
 };
 
+enum ATK_HTTP_TYPE{
+    GET = 1,
+    POST = 2,
+    SLOWLORIS = 3,
+    SLOWREAD = 4,
+    DYNAMIC_HTTP_REQ = 5,
+    RUDY = 6
+};
+
+
 #pragma pack(push, 1)
 struct ETHARPHDR{
     ETHHDR eth_hdr;
@@ -76,6 +86,6 @@ struct HTTPPKT{
     ETHHDR eth_hdr;
     IPv4HDR ip_hdr;
     TCPHDR tcp_hdr;
-    DATATYPE data[];
+    DATATYPE data[BUFSIZ];
 };
 #pragma pack(pop)
