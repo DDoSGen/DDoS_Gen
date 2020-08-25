@@ -21,7 +21,7 @@ class ATTACKMODULE{
 
         // private functions
         void attack_routine();
-        
+         
         // target의 맥주소 받기
         void get_targetinfo(std::string tip);
     public:

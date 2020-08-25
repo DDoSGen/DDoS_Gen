@@ -10,7 +10,8 @@ class PKT{
         pcap_t* pcap_handler;
         char errbuf[PCAP_ERRBUF_SIZE];
         int pcap_res;
-        
+
+
         ////// packet pointer /////
         const uint8_t* pkt_ptr;
         ETHIPTCP* tcp;
