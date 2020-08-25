@@ -231,13 +231,14 @@ void PKT::make_http_packet(HTTPPKT* tcp_ptr, int flagtype, int datalen, ip_t tar
     string host = string(host_str);
 
     // string atk_type{"GET"};
-    // if (flagtype == GET){
-    //     atk_type = "GET";
-    // } else if (flagtype == POST){
-    //     atk_type = "POST";
-    // };
+    string atk_type;
+    if (flagtype == GET){
+        atk_type = string("GET");
+    } else if (flagtype == POST){
+        atk_type = string("POST");
+    };
 
-    string tmpStr = "GET / HTTP/1.1\r\nHost: " + host +"\r\n" + "User-Agent: " + agent
+    string tmpStr = atk_type + " / HTTP/1.1\r\nHost: " + host +"\r\n" + "User-Agent: " + agent
                                                         + "Cache-Control : no-cache\r\n";
     int httpLen = tmpStr.length();
 
