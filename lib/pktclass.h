@@ -42,6 +42,6 @@ class PKT{
         
         // 패킷 만드는 함수
         void make_packet(mac_t* target_mac, uint32_t target_ip, int pkttype, int flagtype, int datalen);
-        void send_packet();
+        int send_packet();
         static void handshake(mac_t* target_mac, ip_t target_ip);
 };
