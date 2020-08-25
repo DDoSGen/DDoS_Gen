@@ -44,7 +44,15 @@ void ATTACKMODULE::attack_routine(){
     gettimeofday(&start, 0);
     end.tv_sec = start.tv_sec + dur;
 
+    struct timespec req;
+    req.tv_sec = 0;
+
+    long count = 0;
+    long avg_swap = 0;
+    long avg_sleep = 0;
+
     while(1){
+        std::chrono::system_clock::time_point StartTime = std::chrono::system_clock::now();
         gettimeofday(&current, 0);
         if(current.tv_sec - end.tv_sec >= 0) break;
     
@@ -131,8 +139,19 @@ void ATTACKMODULE::attack_routine(){
                 printf("type error");
                 break;
         }
+        int size = packet.send_packet();
+        count++;
+        
+        std::chrono::system_clock::time_point EndTime = std::chrono::system_clock::now();
+        
+        // 보내는데 걸린 interval(초)(=함수구동 + sleep time) : 나가는 비트 수(= 패킷길이 * 8) = 1초 : 원하는 속도(Mbps)
+        std::chrono::nanoseconds nano = EndTime - StartTime;
+        long l = ((double)size*8 * 953/*for M/n*/ / (double)speed) - nano.count();
 
-    
-        packet.send_packet();
+        if(l < 0) req.tv_nsec = avg_sleep;
+        else req.tv_nsec = l;
+
+        avg_sleep = (avg_sleep * (count - 1) + req.tv_nsec) / count;
+        nanosleep(&req, NULL);
     }
 }

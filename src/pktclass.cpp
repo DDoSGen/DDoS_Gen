@@ -63,7 +63,7 @@ void PKT::set_attackinfo(ip_t target_ip, mac_t* storage){
 }
 
 // 패킷 보내기 + 동적할당한 메모리 해제 //
-void PKT::send_packet(){
+int PKT::send_packet(){
     pcap_res = pcap_sendpacket(pcap_handler, pkt_ptr, pktsize);
 	if (pcap_res != 0) {
 		fprintf(stderr, "pcap_sendpacket return %d error=%s\n", pcap_res, pcap_geterr(pcap_handler));
@@ -79,6 +79,7 @@ void PKT::send_packet(){
         default:
             break;
     }
+    return pktsize;
 }
 
 void PKT::make_packet(mac_t* target_mac, ip_t target_ip, int pkttype, int flagtype, int datalen){

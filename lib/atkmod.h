@@ -5,6 +5,7 @@
 #include <thread>
 #include <mutex>
 #include <memory>
+#include <chrono>
 
 // TODO: make attack module class
 class ATTACKMODULE{
