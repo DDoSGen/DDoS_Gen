@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <net/if.h>
+#include <pcap.h>
 #include <unistd.h>
 #include <cstring>
 #include <libnet/libnet-macros.h>
@@ -27,3 +28,4 @@ uint32_t get_my_ip(char* dev);
 
 void get_gateMAC(uint8_t* storage);
 void make_MAC_byte(std::string r, uint8_t* storage);
+char* getRandUserAgent();

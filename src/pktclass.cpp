@@ -76,6 +76,8 @@ int PKT::send_packet(){
             delete udp; break;
         case ICMP:
             delete icmp; break;
+        case HTTP:
+            delete http; break;
         default:
             break;
     }
@@ -83,6 +85,9 @@ int PKT::send_packet(){
 }
 
 void PKT::make_packet(mac_t* target_mac, ip_t target_ip, int pkttype, int flagtype, int datalen){
+    if(pkttype == 10){
+        this->pkttype = TCP;
+    }
     this->pkttype = pkttype;
     
     switch(pkttype){
@@ -108,6 +113,14 @@ void PKT::make_packet(mac_t* target_mac, ip_t target_ip, int pkttype, int flagty
             make_icmp_packet(icmp, flagtype, datalen);
             break;
         
+
+        case HTTP:
+            http = new(HTTPPKT);
+            memset(http, 0, sizeof(HTTPPKT));
+            make_common_part(target_mac, target_ip, (ETHIPHDR*)http);
+            make_http_packet(http, flagtype, datalen, target_ip);
+            break;
+
         default:
             printf("no such packet type\n");
             exit(-1);
@@ -165,6 +178,54 @@ void PKT::make_tcp_packet(ETHIPTCP* tcp_ptr, int flagtype, int datalen){
 
     pktsize = sizeof(ETHIPTCP) + datalen;
     pkt_ptr = (const uint8_t*)tcp_ptr;
+}
+
+/*
+void PKT::handshake(mac_t* target_mac, ip_t target_ip){
+    struct pcap_pkthdr* header;
+    ETHIPTCP* packet_ptr;
+
+    make_packet(target_mac, target_ip, TCP, SYN, 0);
+    send_packet();
+    while(1){
+        pcap_res = pcap_next_ex(pcap_handler, &header, (const u_char**)(&packet_ptr));
+        if (pcap_res == 0) continue;
+		if (pcap_res == -1 || pcap_res == -2) {
+			printf("pcap_next_ex return %d(%s)\n", pcap_res, pcap_geterr(pcap_handler));
+			break;
+		}
+
+		if((ntohs(packet_ptr->eth_hdr.ether_type) == ETHERTYPE_ARP)
+        && std::equal(std::begin(packet_ptr->eth_hdr.ether_dhost), std::begin(packet_ptr->eth_hdr.ether_dhost), std::begin(eth_hdr.ether_shost))){
+			
+            
+
+            break;
+		}
+
+    }
+
+
+}
+*/
+void PKT::make_http_packet(HTTPPKT* tcp_ptr, int flagtype, int datalen, ip_t target_ip){
+    DATATYPE tmpData[100];
+
+    this->make_tcp_packet((ETHIPTCP*)tcp_ptr, flagtype, datalen);
+    char* agent = getRandUserAgent();
+
+    // struct in_addr{
+    //     in_addr_t target_ip;
+    // };
+    struct in_addr target;
+    target.s_addr = target_ip;
+    char* host_str = inet_ntoa(target);
+    std::string host = std::string(host_str);
+    //typedef uint8_t DATATYPE;
+    std::string tmpStr = "GET / HTTP/1.1\r\nHost: " + host +"\r\n" + "User-Agent: " + agent
+                                                        + "Cache-Control : no-cache\r\n";
+    memset(tcp_ptr->data, 0 , tmpStr.length());
+    memcpy(tcp_ptr->data, reinterpret_cast<const uint8_t*>(tmpStr.c_str()), tmpStr.length());
 }
 
 void PKT::make_udp_packet(ETHIPUDP* udp_ptr, int datalen){

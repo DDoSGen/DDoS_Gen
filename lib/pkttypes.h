@@ -2,6 +2,7 @@
 #include "macros.h"
 #include <libnet.h>
 #include <cstdint>
+#include <string.h>
 
 // redefine structures in libnet.h
 typedef struct libnet_ethernet_hdr ETHHDR;
@@ -17,7 +18,8 @@ typedef uint8_t DATATYPE;
 enum L4_TYPE{
     TCP = IPPROTO_TCP,
     UDP = IPPROTO_UDP,
-    ICMP = IPPROTO_ICMP
+    ICMP = IPPROTO_ICMP,
+    HTTP = 10
 };
 
 enum ATK_TCP_TPYE{
