@@ -146,9 +146,10 @@ std::string getRandUserAgent(){
 }
 
 std::string getRandDir(){
-    
-    std::default_random_engine generator;
-    std::uniform_int_distribution<int> distribution(0,5);
+
+    int idx;
+    fill_rand((uint8_t*)&idx, 1);
+    idx = idx % 6;
 
     std::string serverDirList[6] = {
         "/index.html ",
@@ -159,5 +160,5 @@ std::string getRandDir(){
         "/bob/1.html" 
     };
 
-    return serverDirList[distribution(generator)];
+    return serverDirList[idx];
 }
