@@ -277,6 +277,8 @@ void PKT::make_icmp_packet(ETHIPICMP* icmp_ptr, int flagtype, int datalen){
     icmp_ptr->ip_hdr.ip_len = htons(LIBNET_IPV4_H + LIBNET_ICMPV4_ECHO_H + datalen);
     icmp_ptr->ip_hdr.ip_sum = Checksum((uint16_t*)(&icmp_ptr->ip_hdr), icmp_ptr->ip_hdr.ip_len);
 
+    pktsize = sizeof(ETHIPUDP) + datalen;
+    pkt_ptr = (const uint8_t*)icmp_ptr;
 }
 
 void PKT::make_specific_packet(
