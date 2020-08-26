@@ -10,6 +10,7 @@ PKT::~PKT(){
 	pcap_close(pcap_handler);      
 }
 
+
 void PKT::set_pcap(){
 	pcap_handler = pcap_open_live(dev, BUFSIZ, 1, 1, errbuf);
 	if (pcap_handler == nullptr) {
@@ -76,14 +77,21 @@ void PKT::send_packet(){
             delete udp; break;
         case ICMP:
             delete icmp; break;
+        case HTTP:
+            delete http; break;
         default:
             break;
     }
 }
 
+int PKT::get_pktsize(){
+    return this->pktsize;
+}
+
 void PKT::make_packet(mac_t* target_mac, ip_t target_ip, int pkttype, int flagtype, int datalen){
     this->pkttype = pkttype;
-    
+
+
     switch(pkttype){
         case TCP:
             tcp = new(ETHIPTCP);
@@ -92,23 +100,25 @@ void PKT::make_packet(mac_t* target_mac, ip_t target_ip, int pkttype, int flagty
             make_tcp_packet(tcp, flagtype, datalen);
             break;
 
-        /*
+        
         case UDP:
             udp = new(ETHIPUDP);
             memset(udp, 0, sizeof(ETHIPUDP));
-            make_common_part(target_ip, (ETHIPHDR*)udp);
-            make_udp_packet();
-            pkt_ptr = (const uint8_t*)udp;
+            make_common_part(target_mac, target_ip, (ETHIPHDR*)udp);
+            make_udp_packet(udp, datalen);
             break;
 
         case ICMP:
             icmp = new(ETHIPICMP);
-            memset(udp, 0, sizeof(ETHIPICMP));
-            make_common_part(target_ip, (ETHIPHDR*)icmp);
-            make_icmp_packet();
-            pkt_ptr = (const uint8_t*)icmp;
+            memset(icmp, 0, sizeof(ETHIPICMP));
+            make_common_part(target_mac, target_ip, (ETHIPHDR*)icmp);
+            make_icmp_packet(icmp, flagtype, datalen);
             break;
-        */
+        
+        case HTTP:
+            make_http_packet(http, flagtype, datalen, target_ip);
+            break;
+        
         default:
             printf("no such packet type\n");
             exit(-1);
@@ -168,11 +178,104 @@ void PKT::make_tcp_packet(ETHIPTCP* tcp_ptr, int flagtype, int datalen){
     pkt_ptr = (const uint8_t*)tcp_ptr;
 }
 
-void PKT::make_udp_packet(){
+/* Didn't test with server */
+/*
+void PKT::handshake(mac_t* target_mac, ip_t target_ip){
+    struct pcap_pkthdr* header;
+    ETHIPTCP* packet_ptr;
 
+    make_packet(target_mac, target_ip, TCP, SYN, 0);
+    uint32_t thSeq = this->tcp->tcp_hdr.th_seq;
+    this->tcp->ip_hdr.ip_src.s_addr = get_my_ip(dev);
+    get_my_mac(dev, this->tcp->eth_hdr.ether_shost);
+
+    send_packet();
+    while(1){
+        pcap_res = pcap_next_ex(pcap_handler, &header, (const u_char**)(&packet_ptr));
+        if (pcap_res == 0) continue;
+		if (pcap_res == -1 || pcap_res == -2) {
+			printf("pcap_next_ex return %d(%s)\n", pcap_res, pcap_geterr(pcap_handler));
+			break;
+		}
+
+		if((ntohs(packet_ptr->ip_hdr.ip_src.s_addr) == ntohs(target_ip))
+            && packet_ptr->tcp_hdr.th_flags==SYN_ACK && packet_ptr->tcp_hdr.th_seq == thSeq +1){
+
+			uint32_t thAck = packet_ptr->tcp_hdr.th_ack;
+            make_packet(target_mac, target_ip, TCP, ACK, 0);
+            this->tcp->tcp_hdr.th_seq = thSeq +1;
+            this->tcp->tcp_hdr.th_ack = packet_ptr->tcp_hdr.th_seq + 1;
+            this->tcp->ip_hdr.ip_src.s_addr = get_my_ip(dev);
+            get_my_mac(dev, this->tcp->eth_hdr.ether_shost);
+            
+            send_packet();
+            handshakeCK = true;
+            break;
+		}
+    }
+}
+*/
+
+
+void PKT::make_http_packet(HTTPPKT* tcp_ptr, int flagtype, int sd, ip_t target_ip){
+    using namespace std;
+
+    struct in_addr target;
+    target.s_addr = target_ip;
+    string host {inet_ntoa(target)};
+    string data = "hello";
+
+    string atk_type;
+    if (flagtype == GET || flagtype == DYNAMIC_HTTP_REQ) atk_type = string("GET ");
+    else if (flagtype == POST) atk_type = string("POST ");
+    string dir = "/";
+    if (flagtype == DYNAMIC_HTTP_REQ){
+        dir = getRandDir();
+    }
+
+    string http_temp = atk_type + dir + " HTTP/1.1\r\n";
+    string host_temp = "Host: " + host + "\r\n";
+    string user_agent_temp = "User-Agent: " + getRandUserAgent() + "\r\n";
+    string content_len_temp = "Content-length: 5\r\n";
+
+    string tmpStr = http_temp + host_temp + user_agent_temp + content_len_temp + data + "\r\n\r\n";
+    
+
+    ssize_t res = send(sd, tmpStr.c_str(), tmpStr.size(), 0);
+	if (res == 0 || res == -1) {
+		fprintf(stderr, "send return %ld\n", res);
+		perror("send");
+		return;
+    }
+    pktsize = res;
 }
 
-void PKT::make_icmp_packet(){
+void PKT::make_udp_packet(ETHIPUDP* udp_ptr, int datalen){
+    udp_ptr->ip_hdr.ip_p = IPPROTO_UDP;   
+
+    fill_rand((uint8_t*)&udp_ptr->udp_hdr.uh_sport, sizeof(uint16_t));
+    fill_rand((uint8_t*)&udp_ptr->udp_hdr.uh_dport, sizeof(uint16_t));
+    udp_ptr->udp_hdr.uh_ulen = htons(datalen);
+    udp_ptr->udp_hdr.uh_sum = 0;
+
+    udp_ptr->ip_hdr.ip_len = htons(LIBNET_IPV4_H + LIBNET_UDP_H + datalen);
+    udp_ptr->ip_hdr.ip_sum = Checksum((uint16_t*)(&udp_ptr->ip_hdr), udp_ptr->ip_hdr.ip_len);
+
+    pktsize = sizeof(ETHIPUDP) + datalen;
+    pkt_ptr = (const uint8_t*)udp_ptr;
+}
+
+void PKT::make_icmp_packet(ETHIPICMP* icmp_ptr, int flagtype, int datalen){
+    icmp_ptr->ip_hdr.ip_p = IPPROTO_ICMP;
+
+    icmp_ptr->icmp_hdr.icmp_type = flagtype;
+    icmp_ptr->icmp_hdr.icmp_code = 0;
+    fill_rand((uint8_t*)&icmp_ptr->icmp_hdr.hun.echo.id, sizeof(uint16_t));
+    fill_rand((uint8_t*)&icmp_ptr->icmp_hdr.hun.echo.seq, sizeof(uint16_t));
+    icmp_ptr->icmp_hdr.icmp_sum = htons(Checksum((uint16_t*)(&icmp_ptr->icmp_hdr), LIBNET_ICMPV4_ECHO_H + datalen));
+
+    icmp_ptr->ip_hdr.ip_len = htons(LIBNET_IPV4_H + LIBNET_ICMPV4_ECHO_H + datalen);
+    icmp_ptr->ip_hdr.ip_sum = Checksum((uint16_t*)(&icmp_ptr->ip_hdr), icmp_ptr->ip_hdr.ip_len);
 
 }
 

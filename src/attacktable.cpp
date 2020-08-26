@@ -12,9 +12,9 @@ std::map<int, std::string> attacktable = {  {1, "TCP_SYN_ATTACK"},
                                             {10, "POST_FLOODING_ATTACK"},
                                             {11, "DYNAMIC_HTTP_REQ_FLOODING"},
                                             {12, "SLOWLORIS_ATTACK"},
-                                            {13, "SLOWREAD_ATTACK"},
+                                            {13, "(X)SLOWREAD_ATTACK"},
                                             {14, "R-U-D-Y_ATTACK"},
-                                            {15, "BIG1_ATTACK"}                 };
+                                            {15, "(X)BIG1_ATTACK"}                 };
 
 void print_attacktable(){
     printf("<<<< ATTACK TYPE NUMBER TABLE >>>>\n");

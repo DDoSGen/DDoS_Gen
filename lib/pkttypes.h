@@ -2,6 +2,7 @@
 #include "macros.h"
 #include <libnet.h>
 #include <cstdint>
+#include <string.h>
 
 // redefine structures in libnet.h
 typedef struct libnet_ethernet_hdr ETHHDR;
@@ -17,7 +18,8 @@ typedef uint8_t DATATYPE;
 enum L4_TYPE{
     TCP = IPPROTO_TCP,
     UDP = IPPROTO_UDP,
-    ICMP = IPPROTO_ICMP
+    ICMP = IPPROTO_ICMP,
+    HTTP = 10
 };
 
 enum ATK_TCP_TPYE{
@@ -25,6 +27,16 @@ enum ATK_TCP_TPYE{
     ACK = TH_ACK,
     SYN_ACK = TH_SYN | TH_ACK
 };
+
+enum ATK_HTTP_TYPE{
+    GET = 1,
+    POST = 2,
+    SLOWLORIS = 3,
+    SLOWREAD = 4,
+    DYNAMIC_HTTP_REQ = 5,
+    RUDY = 6
+};
+
 
 #pragma pack(push, 1)
 struct ETHARPHDR{
@@ -74,6 +86,6 @@ struct HTTPPKT{
     ETHHDR eth_hdr;
     IPv4HDR ip_hdr;
     TCPHDR tcp_hdr;
-    DATATYPE data[];
+    DATATYPE data[BUFSIZ];
 };
 #pragma pack(pop)
